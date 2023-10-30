@@ -1280,6 +1280,19 @@ struct fuse_lowlevel_ops {
 	 */
 	void (*lseek) (fuse_req_t req, fuse_ino_t ino, off_t off, int whence,
 		       struct fuse_file_info *fi);
+
+	/**
+	 * Request the userspace lock for an inode
+	 *
+	 *
+	 * Valid replies:
+	 *   fuse_reply_user_lock
+	 *   fuse_reply_err
+	 *
+	 * @param req request handle
+	 * @param ino the inode number
+	 */
+	void (*user_lock) (fuse_req_t req, fuse_ino_t ino);
 };
 
 /**

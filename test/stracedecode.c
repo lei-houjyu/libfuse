@@ -42,6 +42,7 @@ static struct {
 	[FUSE_BMAP]	   = { "BMAP"	     },
 	[FUSE_DESTROY]	   = { "DESTROY"     },
 	[FUSE_READDIRPLUS] = { "READDIRPLUS" },
+	[FUSE_USER_LOCK]   = { "USER_LOCK" },
 };
 
 #define FUSE_MAXOP (sizeof(fuse_ll_ops) / sizeof(fuse_ll_ops[0]))
