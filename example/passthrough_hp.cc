@@ -156,6 +156,7 @@ struct Fs {
     dev_t src_dev;
     bool nosplice;
     bool nocache;
+    bool writeback_cache;
     size_t num_threads;
     bool clone_fd;
     std::string fuse_mount_options;
@@ -194,7 +195,7 @@ static void sfs_init(void *userdata, fuse_conn_info *conn) {
     if (conn->capable & FUSE_CAP_EXPORT_SUPPORT)
         conn->want |= FUSE_CAP_EXPORT_SUPPORT;
 
-    if (fs.timeout && conn->capable & FUSE_CAP_WRITEBACK_CACHE)
+    if (fs.timeout && fs.writeback_cache && conn->capable & FUSE_CAP_WRITEBACK_CACHE)
         conn->want |= FUSE_CAP_WRITEBACK_CACHE;
 
     if (conn->capable & FUSE_CAP_FLOCK_LOCKS)
@@ -1229,6 +1230,7 @@ static cxxopts::ParseResult parse_options(int argc, char **argv) {
         ("foreground", "Run in foreground")
         ("help", "Print help")
         ("nocache", "Disable attribute all caching")
+        ("writeback_cache", "Enable writeback cache")
         ("nosplice", "Do not use splice(2) to transfer data")
         ("single", "Run single-threaded")
         ("o", "Mount options (see mount.fuse(5) - only use if you know what "
@@ -1333,6 +1335,7 @@ int main(int argc, char *argv[]) {
     fs.root.fd = -1;
     fs.root.nlookup = 9999;
     fs.timeout = options.count("nocache") ? 0 : 86400.0;
+    fs.writeback_cache = options.count("writeback_cache");
 
     struct stat stat;
     auto ret = lstat(fs.source.c_str(), &stat);
