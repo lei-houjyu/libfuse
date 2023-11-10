@@ -1002,6 +1002,14 @@ struct fuse_lseek_out {
 	uint64_t	offset;
 };
 
+enum fuse_user_lock_status {
+	FUSE_USER_LOCK_SUCCESS = 0,
+	FUSE_USER_LOCK_FAIL = 1,
+};
+struct fuse_user_lock_out {
+	enum fuse_user_lock_status status;
+};
+
 struct fuse_copy_file_range_in {
 	uint64_t	fh_in;
 	uint64_t	off_in;

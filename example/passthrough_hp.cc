@@ -55,6 +55,7 @@
 #include <errno.h>
 #include <ftw.h>
 #include <fuse_lowlevel.h>
+#include <fuse_kernel.h>
 #include <inttypes.h>
 #include <string.h>
 #include <sys/file.h>
@@ -967,11 +968,13 @@ static void do_write_buf(fuse_req_t req, size_t size, off_t off,
 }
 
 
+static int write_buf_cnt = 0;
 static void sfs_write_buf(fuse_req_t req, fuse_ino_t ino, fuse_bufvec *in_buf,
                           off_t off, fuse_file_info *fi) {
     (void) ino;
     auto size {fuse_buf_size(in_buf)};
     do_write_buf(req, size, off, in_buf, fi);
+    write_buf_cnt++;
 }
 
 
@@ -985,6 +988,13 @@ static void sfs_statfs(fuse_req_t req, fuse_ino_t ino) {
         fuse_reply_statfs(req, &stbuf);
 }
 
+static int user_lock_cnt = 0;
+static void sfs_user_lock (fuse_req_t req, fuse_ino_t ino) {
+    // sleep for 100us to simulate a lock
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
+    fuse_reply_user_lock(req, FUSE_USER_LOCK_SUCCESS);
+    user_lock_cnt++;
+}
 
 #ifdef HAVE_POSIX_FALLOCATE
 static void sfs_fallocate(fuse_req_t req, fuse_ino_t ino, int mode,
@@ -1154,6 +1164,7 @@ static void assign_operations(fuse_lowlevel_ops &sfs_oper) {
     sfs_oper.read = sfs_read;
     sfs_oper.write_buf = sfs_write_buf;
     sfs_oper.statfs = sfs_statfs;
+    sfs_oper.user_lock = sfs_user_lock;
 #ifdef HAVE_POSIX_FALLOCATE
     sfs_oper.fallocate = sfs_fallocate;
 #endif
@@ -1375,6 +1386,8 @@ int main(int argc, char *argv[]) {
 
 
     fuse_session_unmount(se);
+    std::cout << "user_lock_cnt: " << user_lock_cnt << " " 
+              << "write_buf_cnt: " << write_buf_cnt << std::endl;
 
 err_out3:
     fuse_remove_signal_handlers(se);

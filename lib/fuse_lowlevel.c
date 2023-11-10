@@ -198,6 +198,7 @@ static int fuse_send_msg(struct fuse_session *se, struct fuse_chan *ch,
 	int err = errno;
 
 	if (res == -1) {
+		assert(0);
 		/* ENOENT means the operation was interrupted */
 		if (!fuse_session_exited(se) && err != ENOENT)
 			perror("fuse: writing device");
@@ -1091,6 +1092,16 @@ int fuse_reply_lseek(fuse_req_t req, off_t off)
 
 	memset(&arg, 0, sizeof(arg));
 	arg.offset = off;
+
+	return send_reply_ok(req, &arg, sizeof(arg));
+}
+
+int fuse_reply_user_lock(fuse_req_t req, int s)
+{
+	struct fuse_user_lock_out arg;
+
+	memset(&arg, 0, sizeof(arg));
+	arg.status = (enum fuse_user_lock_status) s;
 
 	return send_reply_ok(req, &arg, sizeof(arg));
 }

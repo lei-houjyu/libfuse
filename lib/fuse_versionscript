@@ -129,6 +129,7 @@ FUSE_3.0 {
 		fuse_parse_conn_info_opts;
 		fuse_fs_lseek;
 		fuse_reply_lseek;
+		fuse_reply_user_lock;
 
 	local:
 		*;

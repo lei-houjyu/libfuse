@@ -1656,6 +1656,15 @@ int fuse_reply_poll(fuse_req_t req, unsigned revents);
  */
 int fuse_reply_lseek(fuse_req_t req, off_t off);
 
+/**
+ * Reply with inode lock information
+ *
+ * @param req request handle
+ * @param ino inode number
+ * @return zero for success, -errno for failure to send reply
+ */
+int fuse_reply_user_lock(fuse_req_t req, int s);
+
 /* ----------------------------------------------------------- *
  * Notification						       *
  * ----------------------------------------------------------- */
