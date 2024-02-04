@@ -198,6 +198,8 @@ static int fuse_send_msg(struct fuse_session *se, struct fuse_chan *ch,
 	int err = errno;
 
 	if (res == -1) {
+    printf("fuse: se->io %p err %d msg %s fd %d\n", 
+           se->io, err, strerror(err), ch ? ch->fd : se->fd);
 		assert(0);
 		/* ENOENT means the operation was interrupted */
 		if (!fuse_session_exited(se) && err != ENOENT)
@@ -1101,7 +1103,7 @@ int fuse_reply_user_lock(fuse_req_t req, int s)
 	struct fuse_user_lock_out arg;
 
 	memset(&arg, 0, sizeof(arg));
-	arg.status = (enum fuse_user_lock_status) s;
+	arg.result = (enum fuse_user_lock_type) s;
 
 	return send_reply_ok(req, &arg, sizeof(arg));
 }
@@ -1937,8 +1939,10 @@ static void do_lseek(fuse_req_t req, fuse_ino_t nodeid, const void *inarg)
 
 static void do_user_lock(fuse_req_t req, fuse_ino_t nodeid, const void *inarg)
 {
+  struct fuse_user_lock_in *arg = (struct fuse_user_lock_in *) inarg;
+
 	if (req->se->op.user_lock)
-		req->se->op.user_lock(req, nodeid);
+		req->se->op.user_lock(req, nodeid, (int) arg->intent);
 	else
 		fuse_reply_err(req, ENOSYS);
 }
