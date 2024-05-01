@@ -1010,6 +1010,7 @@ enum fuse_user_lock_type {
 
 struct fuse_user_lock_in {
   enum fuse_user_lock_type intent;
+  enum fuse_user_lock_type type;
 };
 
 struct fuse_user_lock_out {

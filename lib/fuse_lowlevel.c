@@ -1942,7 +1942,7 @@ static void do_user_lock(fuse_req_t req, fuse_ino_t nodeid, const void *inarg)
   struct fuse_user_lock_in *arg = (struct fuse_user_lock_in *) inarg;
 
 	if (req->se->op.user_lock)
-		req->se->op.user_lock(req, nodeid, (int) arg->intent);
+		req->se->op.user_lock(req, nodeid, (int) arg->intent, (int) arg->type);
 	else
 		fuse_reply_err(req, ENOSYS);
 }

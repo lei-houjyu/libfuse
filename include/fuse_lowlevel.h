@@ -1292,7 +1292,7 @@ struct fuse_lowlevel_ops {
 	 * @param req request handle
 	 * @param ino the inode number
 	 */
-	void (*user_lock) (fuse_req_t req, fuse_ino_t ino, int intent);
+	void (*user_lock) (fuse_req_t req, fuse_ino_t ino, int intent, int type);
 };
 
 /**
