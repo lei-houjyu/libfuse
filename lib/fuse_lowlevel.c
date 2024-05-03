@@ -2333,6 +2333,25 @@ int fuse_lowlevel_notify_inval_inode(struct fuse_session *se, fuse_ino_t ino,
 	return send_notify_iov(se, FUSE_NOTIFY_INVAL_INODE, iov, 2);
 }
 
+int fuse_lowlevel_notify_revoke_user_lock(struct fuse_session *se, fuse_ino_t ino)
+{
+	struct fuse_notify_revoke_user_lock_out outarg;
+	struct iovec iov[2];
+
+	if (!se)
+		return -EINVAL;
+
+	if (se->conn.proto_minor < 12)
+		return -ENOSYS;
+	
+	outarg.ino = ino;
+
+	iov[1].iov_base = &outarg;
+	iov[1].iov_len = sizeof(outarg);
+
+	return send_notify_iov(se, FUSE_NOTIFY_REVOKE_USER_LOCK, iov, 2);
+}
+
 /**
  * Notify parent attributes and the dentry matching parent/name
  * 

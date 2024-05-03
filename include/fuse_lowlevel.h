@@ -1705,6 +1705,15 @@ int fuse_lowlevel_notify_inval_inode(struct fuse_session *se, fuse_ino_t ino,
 				     off_t off, off_t len);
 
 /**
+ * Notify to revoke the offloaded userspace lock.
+ *
+ * @param se the session object
+ * @param ino the inode number
+ * @return zero for success, -errno for failure
+ */
+int fuse_lowlevel_notify_revoke_user_lock(struct fuse_session *se, fuse_ino_t ino);
+
+/**
  * Notify to invalidate parent attributes and the dentry matching parent/name
  *
  * To avoid a deadlock this function must not be called in the

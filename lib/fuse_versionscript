@@ -97,6 +97,7 @@ FUSE_3.0 {
 		fuse_getgroups;
 		fuse_lowlevel_notify_inval_entry;
 		fuse_lowlevel_notify_inval_inode;
+		fuse_lowlevel_notify_revoke_user_lock;
 		fuse_lowlevel_notify_poll;
 		fuse_notify_poll;
 		fuse_opt_add_opt_escaped;

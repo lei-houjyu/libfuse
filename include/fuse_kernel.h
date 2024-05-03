@@ -589,6 +589,7 @@ enum fuse_notify_code {
 	FUSE_NOTIFY_STORE = 4,
 	FUSE_NOTIFY_RETRIEVE = 5,
 	FUSE_NOTIFY_DELETE = 6,
+	FUSE_NOTIFY_REVOKE_USER_LOCK = 7,
 	FUSE_NOTIFY_CODE_MAX,
 };
 
@@ -947,6 +948,10 @@ struct fuse_notify_inval_inode_out {
 	uint64_t	ino;
 	int64_t		off;
 	int64_t		len;
+};
+
+struct fuse_notify_revoke_user_lock_out {
+	uint64_t	ino;
 };
 
 struct fuse_notify_inval_entry_out {
