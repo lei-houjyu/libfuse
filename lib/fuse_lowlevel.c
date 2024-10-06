@@ -198,9 +198,6 @@ static int fuse_send_msg(struct fuse_session *se, struct fuse_chan *ch,
 	int err = errno;
 
 	if (res == -1) {
-    printf("fuse: se->io %p err %d msg %s fd %d\n", 
-           se->io, err, strerror(err), ch ? ch->fd : se->fd);
-		assert(0);
 		/* ENOENT means the operation was interrupted */
 		if (!fuse_session_exited(se) && err != ENOENT)
 			perror("fuse: writing device");
