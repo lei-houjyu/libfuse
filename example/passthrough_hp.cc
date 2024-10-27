@@ -216,6 +216,7 @@ static void sfs_init(void *userdata, fuse_conn_info *conn) {
 
 
 static void sfs_getattr(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
+    // std::cout << "sfs_getattr" << std::endl;
     (void)fi;
     Inode& inode = get_inode(ino);
     struct stat attr;
@@ -307,6 +308,7 @@ out_err:
 
 static void sfs_setattr(fuse_req_t req, fuse_ino_t ino, struct stat *attr,
                         int valid, fuse_file_info *fi) {
+    // std::cout << "sfs_setattr" << std::endl;
     (void) ino;
     do_setattr(req, ino, attr, valid, fi);
 }
@@ -405,6 +407,7 @@ static int do_lookup(fuse_ino_t parent, const char *name,
 
 
 static void sfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name) {
+    // std::cout << "sfs_lookup" << std::endl;
     fuse_entry_param e {};
     auto err = do_lookup(parent, name, &e);
     if (err == ENOENT) {
@@ -645,6 +648,7 @@ static DirHandle *get_dir_handle(fuse_file_info *fi) {
 
 
 static void sfs_opendir(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
+    // std::cout << "sfs_opendir" << std::endl;
     Inode& inode = get_inode(ino);
     auto d = new (nothrow) DirHandle;
     if (d == nullptr) {
@@ -789,6 +793,7 @@ error:
 
 static void sfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                         off_t offset, fuse_file_info *fi) {
+    // std::cout << "sfs_readdir" << std::endl;
     // operation logging is done in readdir to reduce code duplication
     do_readdir(req, ino, size, offset, fi, 0);
 }
@@ -796,6 +801,7 @@ static void sfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
 
 static void sfs_readdirplus(fuse_req_t req, fuse_ino_t ino, size_t size,
                             off_t offset, fuse_file_info *fi) {
+    // std::cout << "sfs_readdirplus" << std::endl;
     // operation logging is done in readdir to reduce code duplication
     do_readdir(req, ino, size, offset, fi, 1);
 }
@@ -859,6 +865,7 @@ static void sfs_fsyncdir(fuse_req_t req, fuse_ino_t ino, int datasync,
 
 
 static void sfs_open(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
+    // std::cout << "sfs_open" << std::endl;
     Inode& inode = get_inode(ino);
 
     /* With writeback cache, kernel may send read requests even
@@ -906,6 +913,7 @@ static void sfs_open(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
 
 
 static void sfs_release(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
+    // std::cout << "sfs_release" << std::endl;
     Inode& inode = get_inode(ino);
     lock_guard<mutex> g {inode.m};
     inode.nopen--;
@@ -915,6 +923,7 @@ static void sfs_release(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
 
 
 static void sfs_flush(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) {
+    // std::cout << "sfs_flush" << std::endl;
     (void) ino;
     auto res = close(dup(fi->fh));
     fuse_reply_err(req, res == -1 ? errno : 0);
@@ -946,32 +955,15 @@ static void do_read(fuse_req_t req, size_t size, off_t off, fuse_file_info *fi) 
 
 static void sfs_read(fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
                      fuse_file_info *fi) {
+    // std::cout << "sfs_read" << std::endl;
     (void) ino;
     do_read(req, size, off, fi);
 }
 
-
-static void do_write_buf(fuse_req_t req, size_t size, off_t off,
-                         fuse_bufvec *in_buf, fuse_file_info *fi) {
-    fuse_bufvec out_buf = FUSE_BUFVEC_INIT(size);
-    out_buf.buf[0].flags = static_cast<fuse_buf_flags>(
-        FUSE_BUF_IS_FD | FUSE_BUF_FD_SEEK);
-    out_buf.buf[0].fd = fi->fh;
-    out_buf.buf[0].pos = off;
-
-    auto res = fuse_buf_copy(&out_buf, in_buf, FUSE_BUF_COPY_FLAGS);
-    if (res < 0)
-        fuse_reply_err(req, -res);
-    else
-        fuse_reply_write(req, (size_t)res);
-}
-
-
-static void sfs_write_buf(fuse_req_t req, fuse_ino_t ino, fuse_bufvec *in_buf,
-                          off_t off, fuse_file_info *fi) {
-    (void) ino;
-    auto size {fuse_buf_size(in_buf)};
-    do_write_buf(req, size, off, in_buf, fi);
+static void sfs_write(fuse_req_t req, fuse_ino_t ino, const char *buf,
+		                  size_t size, off_t off, struct fuse_file_info *fi) {
+    // std::cout << "sfs_write" << std::endl;
+    fuse_reply_write(req, size);
 }
 
 
@@ -1011,6 +1003,7 @@ static void sfs_flock(fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi,
 #ifdef HAVE_SETXATTR
 static void sfs_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
                          size_t size) {
+    // std::cout << "sfs_getxattr" << std::endl;
     char *value = nullptr;
     Inode& inode = get_inode(ino);
     ssize_t ret;
@@ -1054,6 +1047,7 @@ out:
 
 
 static void sfs_listxattr(fuse_req_t req, fuse_ino_t ino, size_t size) {
+    // std::cout << "sfs_listxattr" << std::endl;
     char *value = nullptr;
     Inode& inode = get_inode(ino);
     ssize_t ret;
@@ -1097,6 +1091,7 @@ out:
 
 static void sfs_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
                          const char *value, size_t size, int flags) {
+    // std::cout << "sfs_setxattr" << std::endl;
     Inode& inode = get_inode(ino);
     ssize_t ret;
     int saverr;
@@ -1112,6 +1107,7 @@ static void sfs_setxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 
 
 static void sfs_removexattr(fuse_req_t req, fuse_ino_t ino, const char *name) {
+    // std::cout << "sfs_removexattr" << std::endl;
     char procname[64];
     Inode& inode = get_inode(ino);
     ssize_t ret;
@@ -1152,18 +1148,18 @@ static void assign_operations(fuse_lowlevel_ops &sfs_oper) {
     sfs_oper.flush = sfs_flush;
     sfs_oper.fsync = sfs_fsync;
     sfs_oper.read = sfs_read;
-    sfs_oper.write_buf = sfs_write_buf;
+    sfs_oper.write = sfs_write;
     sfs_oper.statfs = sfs_statfs;
 #ifdef HAVE_POSIX_FALLOCATE
     sfs_oper.fallocate = sfs_fallocate;
 #endif
     sfs_oper.flock = sfs_flock;
-#ifdef HAVE_SETXATTR
-    sfs_oper.setxattr = sfs_setxattr;
-    sfs_oper.getxattr = sfs_getxattr;
-    sfs_oper.listxattr = sfs_listxattr;
-    sfs_oper.removexattr = sfs_removexattr;
-#endif
+// #ifdef HAVE_SETXATTR
+//     sfs_oper.setxattr = sfs_setxattr;
+//     sfs_oper.getxattr = sfs_getxattr;
+//     sfs_oper.listxattr = sfs_listxattr;
+//     sfs_oper.removexattr = sfs_removexattr;
+// #endif
 }
 
 static void print_usage(char *prog_name) {
